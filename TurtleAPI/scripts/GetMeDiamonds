@@ -1,0 +1,90 @@
+print("'Get Me Diamonds!', by ZephDavies")
+
+local maxRadius = 5
+local numLevels = 5
+
+inv.initialise()
+if not inv.findChest() then
+  print("Error: Place a chest next to the Turtle")
+  error()
+end
+
+function GetMeDiamonds()
+  FindBedrock()
+  StripMine()
+  move.toD(0)
+  inv.deposit()
+  print("Finished Getting Diamonds!")
+end
+
+function FindBedrock()
+  while move.down(1) do end
+  CheckForBedrock()
+end
+
+function CheckForBedrock()
+  for i = 1,4 do
+    if turtle.detect() and not dig.forward(true) then
+      print("Found Bedrock, moving up!")
+      move.up(1)
+      CheckForBedrock()
+      break
+    else
+      turn.right()
+    end
+  end
+  print("Seems clear... Starting StripMine!")
+  return true
+end
+
+function StripMine()
+  for cLevel=1,numLevels do
+    move.up(1)
+    if cLevel > 1 then
+      move.up(2)
+    end
+    local cPos = log.getPos()
+    if math.abs(cPos.d) > 1 then
+      Spiral()
+      print("Finished Level, Moving Up!")
+    else
+      print("Warning: May break chest, skipping level.")
+    end
+  end
+end
+
+function Spiral()
+  --fuel.level(true)
+  for cRadius = 1,maxRadius do
+    local dist = 2*cRadius
+    if not (
+      move.forward(1,{"checkOre","checkInv"}) and
+      turn.right() and
+      move.forward(dist-1,{"checkOre","checkInv"}) and
+      turn.right() and
+      move.forward(dist,{"checkOre","checkInv"}) and
+      turn.right() and
+      move.forward(dist,{"checkOre","checkInv"}) and
+      turn.right() and
+      move.forward(dist,{"checkOre","checkInv"})
+      ) then
+        -- move up and reset
+        AvoidBedrock()
+        Spiral()
+        break
+    end
+  end
+  move.toXY(0,0)
+end
+
+function AvoidBedrock()
+  print("Oops! Found more Bedrock! Moving up.")
+  if not (move.up(2) or move.toXY(0,0)) then
+    print("Error: Failed to avoid Bedrock!")
+    move.toXY(0,0)
+    move.toD(0)
+    error()
+  end
+end
+
+GetMeDiamonds()

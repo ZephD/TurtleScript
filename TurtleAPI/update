@@ -1,0 +1,42 @@
+args = {...}
+
+if #args == 0 then
+    print("Usage: update <filename/api/all>")
+    return
+end
+
+local str = string.lower(args[1])
+
+if str == "all" then
+  local FileList = fs.list("")
+  local Files = {}
+  for i = 1,#FileList do
+    if not fs.isDir(FileList[i]) then
+      shell.run("update "..string.lower(FileList[i]))
+    end
+  end
+end
+
+-- Scripts
+if str == "getmediamonds" then shell.run("market get gjdhvy GetMeDiamonds y") end
+if str == "boreholes"     then shell.run("market get gjdhwd BoreHoles y") end
+if str == "feathermine"   then shell.run("market get gjdhwp FeatherMine y") end
+if str == "stairs"        then shell.run("market get gjdhx1 Stairs y") end
+if str == "digarea"       then shell.run("market get gjdi7w DigArea y") end
+if str == "circle"        then shell.run("market get gjdhxu Circle y") end
+
+-- Misc Files
+if str == "update"  then shell.run("market get gjdhx2 update y") end
+if str == "startup" then shell.run("market get gjdhv2 startup y") end
+
+-- API
+if str == "api" then
+  if not fs.isDir("api") then shell.run("mkdir api") end
+  shell.run("market get gjdhuu api/attack y")
+  shell.run("market get gjdhuv api/dig y")
+  shell.run("market get gjdhuw api/fuel y")
+  shell.run("market get gjdhux api/inv y")
+  shell.run("market get gjdhuy api/log y")
+  shell.run("market get gjdhuz api/move y")
+  shell.run("market get gjdhv0 api/turn y")
+end

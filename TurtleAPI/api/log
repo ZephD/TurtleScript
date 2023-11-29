@@ -1,0 +1,77 @@
+-- Position and Direction Logging (for recovery / continuation)
+
+-- TODO:
+-- Write all to disk
+
+-- NOTE: Yaw: 0=forward, 1=right, 2=back, 3=left
+
+function setAsHome()
+  cPos = {x=0,y=0,d=0}
+  cYaw = 0
+end
+
+function setPos(...)
+  local args={...}
+  if #args==3 then
+    cPos = {x=args[1],y=args[2],d=args[3]}
+  elseif #args==2 then
+    cPos = {x=args[1],y=args[2],d=0}
+  else
+    print("Usage:\n setPos(x,y)\n setPos(x,y,depth)")
+  end
+end
+
+function getPos(tf)
+  local tf = tf or false
+  if tf then
+    print("Current Position: ["..cPos.x..","..cPos.y.."]")
+    print("Current Depth: "..cPos.d)
+  end
+  local tempPos = {}
+  for k,v in pairs(cPos) do
+    tempPos[k] = v
+  end
+  return tempPos
+end
+
+function updatePos(hozDist,vertDist)
+  updateXY(hozDist)
+  updateD(vertDist)
+end
+
+function updateXY(dist)
+  if cYaw == 0 then
+    cPos.y = cPos.y + dist
+  elseif cYaw == 2 then
+    cPos.y = cPos.y - dist
+  elseif cYaw == 1 then
+    cPos.x = cPos.x + dist
+  elseif cYaw == 3 then
+    cPos.x = cPos.x - dist
+  end
+end
+
+function updateD(depth)
+  cPos.d = cPos.d + depth
+end
+
+function setYaw(yaw)
+  cYaw = yaw
+end
+
+function getYaw()
+  return cYaw
+end
+
+function updateYaw(nYaw)
+  if math.abs(nYaw) == 1 then
+    cYaw = cYaw + nYaw
+    if cYaw == 4 then
+      cYaw = 0
+    elseif cYaw == -1 then
+      cYaw = 3
+    end
+  else
+    error("Usage: updateYaw(dir), -1:left, +1:right")
+  end
+end

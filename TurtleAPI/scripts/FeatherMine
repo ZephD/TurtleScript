@@ -1,0 +1,41 @@
+print("'Feather Mine!', by ZephDavies")
+
+local numBranch = 8
+local branchLen = 8
+
+inv.initialise()
+
+function FeatherMine()
+  for branchNum = 1,numBranch do
+    turn.faceYaw(0)
+    move.forward(3)
+    turn.faceYaw(3) -- left
+    MineBranch()
+    turn.faceYaw(1) -- right
+    MineBranch()
+  end
+  move.toY(0)
+  inv.deposit()
+end
+
+function MineBranch()
+  for lenBranch = 1,branchLen do
+    move.forward()
+    CheckSides()
+  end
+  move.toX(0)
+end
+
+function CheckSides()
+  turn.left()
+  dig.checkOre({0,-1})
+  move.up()
+  dig.checkOre({0,1})
+  turn.right(2)
+  dig.checkOre({0})
+  move.down()
+  dig.checkOre({0})
+  turn.left()
+end
+
+FeatherMine()

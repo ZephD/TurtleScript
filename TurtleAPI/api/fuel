@@ -1,0 +1,59 @@
+-- Fuel API
+
+fuelSlot = fuelSlot or 16
+
+function getSlot()
+  return fuelSlot
+end
+
+function level(displayFuel)
+  local displayFuel = displayFuel or false
+  local fuel = turtle.getFuelLevel()
+  if displayFuel then print("Fuel Level: "..fuel) end
+  return fuel
+end
+
+function toGetHome()
+  -- NOTE: Assumes home is at (0,0,0)
+  local cPos = log.getPos()
+  return math.abs(cPos.x)+math.abs(cPos.y)+math.abs(cPos.d)
+end
+
+function check(extra)
+  local extra = extra or 0
+  while fuel.level() < fuel.toGetHome()+extra do
+    if not fuel.refuel() then
+      return false
+    end
+  end
+  return true
+end
+
+function refuel()
+  turtle.select(fuelSlot)
+  if not turtle.refuel(1) then
+    if not fuel.find() then
+      turtle.select(1)
+      return false
+    end
+  end
+  turtle.select(1)
+  return true
+end
+
+function find()
+  for slot = 1,16 do
+    if turtle.getItemCount(slot) > 0 then
+      turtle.select(slot)
+      if turtle.refuel(1) then
+        fuelSlot = slot
+        turtle.select(1)
+        return true
+      end
+    end
+  end
+  print("Warning: No fuel in inventory!")
+  fuel.level(true)
+  turtle.select(1)
+  return false
+end

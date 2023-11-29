@@ -1,0 +1,43 @@
+-- Turning API
+
+function right(t)
+  local t = t or 1
+  local i = 0
+  while i < t do
+    if turtle.turnRight() then
+      i = i + 1
+      log.updateYaw(1)
+    end
+  end
+  return true
+end
+
+function left(t)
+  local t = t or 1
+  local i = 0
+  while i < t do
+    if turtle.turnLeft() then
+      i = i + 1
+      log.updateYaw(-1)
+    end
+  end
+  return true
+end
+
+function faceYaw(rYaw)
+  if not rYaw then
+    error("Usage: faceYaw(rYaw)")
+  end
+  local cYaw = log.getYaw()
+  local dYaw = cYaw-rYaw
+  if dYaw == 0 then
+    return true
+  elseif math.abs(dYaw) == 2 then
+    turn.right(2)
+  elseif dYaw == 1 or dYaw == -3 then
+    turn.left()
+  elseif dYaw == -1 or dYaw == 3 then
+    turn.right()
+  end
+  return true
+end

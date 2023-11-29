@@ -1,0 +1,86 @@
+-- Digging API
+
+function forward(checkInv)
+  local checkInv = checkInv or false
+  if checkInv then
+    inv.checkSpace()
+  end
+  if turtle.detect() then
+    if not turtle.dig() then
+      print("Obstruction in front! Bedrock?")
+      return false
+    end
+    return true
+  end
+  return false
+end
+
+function up(checkInv)
+  local checkInv = checkInv or false
+  if checkInv then
+    inv.checkSpace()
+  end
+  if turtle.detectUp() then
+    if not turtle.digUp() then
+      print("Obstruction above! Bedrock?")
+      return false
+    end
+    return true
+  end
+  return false
+end
+
+function down(checkInv)
+  local checkInv = checkInv or false
+  if checkInv then
+    inv.checkSpace()
+  end
+  if turtle.detectDown() then
+    if not turtle.digDown() then
+      print("Obstruction below! Bedrock?")
+      return false
+    end
+    return true
+  end
+  return false
+end
+
+function checkOres(dirs) -- Typo Function
+  return checkOre(dirs)
+end
+
+function checkOre(dirs)
+  -- dirs: -1=down, 0=forwards, 1=up
+  local dirs = dirs or {0}
+  local ore = {["0"]=false, ["-1"]=false, ["1"]=false}
+  for i,v in ipairs(dirs) do
+    if v == 0 then
+      ore["0"] = true
+    elseif v == -1 then
+      ore["-1"] = true
+    elseif v == 1 then
+      ore["1"] = true
+    end
+  end 
+  local ignoreBlocks = inv.getIgnoreBlocks() or {}
+  for i = 1,#ignoreBlocks do
+    if (ore["0"] and turtle.detect()) or (ore["-1"] and turtle.detectDown()) or (ore["1"] and turtle.detectUp()) then
+      turtle.select(ignoreBlocks[i])
+    else
+      break
+    end
+    if ore["0"] and turtle.detect() and turtle.compare(ignoreBlocks[i]) then
+      ore["0"] = false
+    end
+    if ore["-1"] and turtle.detectDown() and turtle.compareDown(ignoreBlocks[i]) then
+      ore["-1"] = false
+    end
+    if ore["1"] and turtle.detectUp() and turtle.compareUp(ignoreBlocks[i]) then
+      ore["1"] = false
+    end
+  end
+  if ore["0"] then dig.forward(true) end
+  if ore["-1"] then dig.down(true) end
+  if ore["1"] then dig.up(true) end
+  turtle.select(1)
+end

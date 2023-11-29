@@ -1,0 +1,40 @@
+-- Load APIs
+print("Loading APIs...")
+
+-- Get all files in apiFolder
+local apiFolder = "api"
+local apiContent
+if fs.isDir(apiFolder) then
+  apiContent = fs.list(apiFolder)
+else
+  print("Warning: api folder not found. Are you in the correct location?")
+end
+
+-- Check if they are files or folders
+local j = 0
+local APIs = {}
+for i = 1,#apiContent do
+  if not fs.isDir(apiFolder.."/"..apiContent[i]) then
+    sleep(0.05)
+    print("  Loaded "..apiContent[i].." API")
+    j = j + 1
+    APIs[j] = apiContent[i]
+  end
+end
+
+-- Load each API file
+for i = 1,#APIs do
+  os.loadAPI(apiFolder.."/"..APIs[i])
+end
+
+-- Clear Logs, reset position
+log.setAsHome()
+
+-- Introduce yourself!
+sleep(0.5)
+shell.run("clear")
+if not os.getComputerLabel() then
+  os.setComputerLabel("Turtle")
+end
+local name = os.getComputerLabel()
+print("Greetings! I am "..name.."!")

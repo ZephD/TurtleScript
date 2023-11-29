@@ -1,0 +1,89 @@
+print("'VolumeMine', by ZephDavies")
+
+local f, l, r, u, d
+
+print("\nNumber of Blocks infront of Turtle?")
+repeat
+  f = math.abs(tonumber(io.read()))
+until f>=0
+
+print("\nNumber of Blocks to Turtles Left?")
+repeat
+  l = math.abs(tonumber(io.read()))
+until l>=0
+
+print("\nNumber of Blocks to Turtles Right?")
+repeat
+  r = math.abs(tonumber(io.read()))
+until r>=0
+
+print("\nNumber of Blocks Up?")
+repeat
+  u = math.abs(tonumber(io.read()))
+until u>=0
+
+print("\nNumber of Blocks Down?")
+repeat
+  d = math.abs(tonumber(io.read()))
+until d>=0
+
+function ZigZag(k,digUp,digDown)
+  for j = my,My,dy do
+    for i = mx,Mx,dx do
+      move.toXY(i,j,{"checkInv"})
+      move.toD(k,{"checkInv"})
+      if digUp then
+        dig.up()
+      end
+      if digDown then
+        dig.down()
+      end
+    end
+    mx,Mx,dx=Mx,mx,-dx
+  end
+  my,My,dy=My,my,-dy
+end
+
+function ZagZig(k,digUp,digDown)
+  for i = mx,Mx,dx do
+    for j = my,My,dy do
+      move.toXY(i,j,{"checkInv"})
+      move.toD(k,{"checkInv"})
+      if digUp then
+        dig.up()
+      end
+      if digDown then
+        dig.down()
+      end
+    end
+    my,My,dy=My,my,-dy
+  end
+  mx,Mx,dx=Mx,mx,-dx
+end
+
+-- Main Function --
+mx,Mx,dx=-l,r,1
+my,My,dy=1,f,1
+local z={}
+for k=u,-d,-1 do
+  z[#z+1]=k
+end
+inv.initialise()
+for i = 1,math.floor(#z/3) do
+  if l+r+1>=f then
+    ZigZag(z[i*3-1],true,true)
+  else
+    ZagZig(z[i*3-1],true,true)
+  end
+end
+if #z%3~=0 then
+  if l+r+1>=f then
+    ZigZag(z[#z],#z%3==2,false)
+  else
+    ZagZig(z[#z],#z%3==2,false)
+  end
+end
+move.home("DXY")
+inv.deposit()
+turn.faceYaw(0)
+print("All done!")

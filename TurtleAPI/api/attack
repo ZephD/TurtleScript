@@ -1,0 +1,39 @@
+-- Attacking API
+
+-- Note: The sleep(0.6) allows for damage immunity (0.5) after taking damage
+
+function forward()
+  if turtle.attack() then
+    print("Mob in Front! Attacking!")
+    repeat
+      sleep(0.6)
+    until not turtle.attack()
+    sleep(0.6)
+    return true
+  end
+  return false
+end
+
+function up()
+  if turtle.attackUp() then
+    print("Mob Above! Attacking!")
+    repeat
+      sleep(0.6)
+    until not turtle.attackUp()
+    sleep(0.6)
+    return true
+  end
+  return false
+end
+
+function down()
+  if turtle.attackDown() then
+    print("Mob Below! Attacking!")
+    repeat
+      sleep(0.6)
+    until not turtle.attackDown()
+    sleep(0.6)
+    return true
+  end
+  return false
+end

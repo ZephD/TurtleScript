@@ -1,0 +1,99 @@
+print("'Stairs', by ZephDavies")
+
+function getYesOrNo()
+  while true do
+    s = io.read()
+    if s=="yes" or s=="Yes" or s=="YES" or s=="y" or s=="Y" then
+      return true
+    end
+    if s=="no" or s=="No" or s=="NO" or s=="n" or s=="N" then
+      return false
+    end
+  end
+end
+
+function getStairSlot()
+  if turtle.getItemCount(stairSlots[stairInt]) <= 1 then
+    stairInt = stairInt + 1
+  end
+  if stairInt > #stairSlots then
+    print("Oops! Out of stairs! Continuing to dig, however.")
+    placeStairs, placeStairsRoof = false, false
+    stairInt = stairInt - 1
+  end
+  return stairSlots[stairInt]
+end
+
+function placeStairUp()
+  local rYaw = log.getYaw()
+  turn.faceYaw(0)
+  turtle.select(getStairSlot())
+  turtle.placeUp()
+  turn.faceYaw(rYaw)
+end
+
+function placeStairDown()
+  local rYaw = log.getYaw()
+  turn.faceYaw(2)
+  turtle.select(getStairSlot())
+  turtle.placeDown()
+  turn.faceYaw(rYaw)
+end
+
+-- Sort out Stair stuff
+print("\nDo you want me to place Stairs?")
+placeStairs = getYesOrNo()
+print("\nDo you want me to place Stairs on the roof?")
+placeStairsRoof = getYesOrNo()
+if placeStairs or placeStairsRoof then
+  print("\nOk! Place stairs in at least slot 1.")
+  print("You can give me more stairs! I may need them.")
+  print("Press any key when ready.")
+  repeat
+    io.read()
+  until  turtle.getItemCount(1) > 0
+  stairSlots = {}
+  stairInt = 1
+  for slot = 1,16 do
+    turtle.select(slot)
+    if turtle.compareTo(1) then
+      stairSlots[#stairSlots+1] = slot
+    end
+  end
+end
+
+fuel.find()
+
+-- Dig Down Left Side
+move.up()
+while true do
+  move.forward()
+  move.up()
+  dig.up()
+  if placeStairsRoof then placeStairUp() end
+  if not move.down(2) then break end
+  dig.down()
+  if placeStairs then placeStairDown() end
+end
+
+-- Dig Up Right Side
+turn.right()
+move.forwards()
+move.up()
+dig.up()
+if placeStairsRoof then placeStairUp() end
+move.down()
+turn.right()
+repeat
+  move.forward()
+  dig.down()
+  if placeStairs then placeStairDown() end
+  move.up(2)
+  dig.up()
+  if placeStairsRoof then placeStairUp() end
+  move.down()
+until log.getPos().d > 0
+
+move.home("DYX")
+turn.faceYaw(0)
+print("I'm done!")

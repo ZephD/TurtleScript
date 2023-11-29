@@ -1,0 +1,86 @@
+print("'Circles!' v0.1\nBy Zeph\n")
+
+print("\nRadius?")
+local r
+repeat
+  r = math.abs(tonumber(io.read()))
+until r>=0
+
+local o = math.floor((math.sqrt(2)*(r-1)+4)/2) -- NumOctantPoints
+local n = 8*o -- NumPoints
+local P = {} -- Points
+
+-- Initialise Array
+for i = 1,n do
+    P[i] = {}
+    --P[i][1] = nil -- X
+    --P[i][2] = nil -- Y
+    P[i][3] = false -- isPlaced
+end
+
+local x  = 0
+local y  = r
+local f  = 1-r
+local dx = 1
+local dy = -2*r
+
+-- Fill Array
+P[1][1]=x
+P[1][2]=y
+P[2*o][1]=y
+P[2*o][2]=x
+P[2*o+1][1]=y
+P[2*o+1][2]=-x
+P[4*o][1]=x
+P[4*o][2]=-y
+P[4*o+1][1]=-x
+P[4*o+1][2]=-y
+P[6*o][1]=-y
+P[6*o][2]=-x
+P[6*o+1][1]=-y
+P[6*o+1][2]=x
+P[8*o][1]=-x
+P[8*o][2]=y
+for i = 2,o do
+  if f > 0 then
+    y = y-1
+    dy = dy+2
+    f = f+dy
+  end
+  x = x+1
+  dx = dx+2
+  f = f+dx
+  P[i][1]=x
+  P[i][2]=y
+  P[2*o+i][1]=y
+  P[2*o+i][2]=-x
+  P[2*o-i+1][1]=y
+  P[2*o-i+1][2]=x
+  P[4*o+i][1]=-x
+  P[4*o+i][2]=-y
+  P[4*o-i+1][1]=x
+  P[4*o-i+1][2]=-y
+  P[6*o+i][1]=-y
+  P[6*o+i][2]=x
+  P[6*o-i+1][1]=-y
+  P[6*o-i+1][2]=-x
+  P[8*o-i+1][1]=-x
+  P[8*o-i+1][2]=y
+end
+
+-- Debug
+--for i = 1,n do
+--    print(tostring(P[i][1]) .." ".. tostring(P[i][2]) .." ".. tostring(P[i][3]))
+--end
+
+fuel.find()
+move.up()
+for i = 1,n do
+  move.toXY(P[i][1],P[i][2])
+  if turtle.detectDown() and not turtle.compareDown() then
+    dig.down()
+  end
+  P[i][3] = turtle.placeDown()
+end
+move.home('XYD')
+turn.faceYaw(0)

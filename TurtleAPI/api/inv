@@ -1,0 +1,147 @@
+-- Inventory and Chest Management API
+
+function initialise()
+  fuel.find()
+  print("FuelSlot: "..fuel.getSlot())
+  fuel.level(true)
+  inv.findIgnoreBlocks()
+end
+
+function findIgnoreBlocks()
+  ignoreBlocks = {}
+  lastKnownEmptySlot = 0
+  for slot = 1,16 do
+    if not (slot == fuel.getSlot()) then
+      if turtle.getItemCount(slot) > 0 then
+        ignoreBlocks[#ignoreBlocks+1] = slot
+      elseif lastKnownEmptySlot == 0 then
+        lastKnownEmptySlot = slot
+        print("LastKnownEmptySlot: "..slot)
+      end
+    end
+  end
+  if lastKnownEmptySlot == 0 then
+    error("Turtle is full!")
+  end
+  if #ignoreBlocks == 0 then
+    print("Warning: No ignore blocks detected!\nIs this correct?")
+    local r = read()
+    if r=="n" or r=="no" or r=="N" or r=="No" or r=="NO" then
+      print("Ok, set me up!")
+      error()
+    end
+  else
+    print("#IgnoreBlocks: "..#ignoreBlocks)
+  end
+end
+
+function getIgnoreBlocks()
+  return ignoreBlocks
+end
+
+function checkSpace()
+  if not haveSpace() then
+    print("Returning Home to Deposit.")
+    -- Get Return Position
+    local rPos = log.getPos()
+    local rYaw = log.getYaw()
+    if not (move.toXY(0,0) and move.toD(0)) then
+      print("Error: Failed to return. Find me!")
+      print("("..cPos.x..","..cPos.y..") "..cPos.d)
+      error()
+    end
+    print("Depositing Goods.")
+    if not inv.deposit() then
+      print("Error: Unable to deposit goods!")
+      error()
+    end
+    print("Returning To Mine.")
+    move.toD(rPos.d)
+    move.toXY(rPos.x,rPos.y)
+    turn.faceYaw(rYaw)
+  end
+end
+
+function haveSpace()
+  -- For speed, check lastKnownEmptySlot
+  if turtle.getItemCount(lastKnownEmptySlot) == 0 then
+    return true
+  end
+  -- Otherwise, perform a scan
+  for slot = 1,16 do
+    if turtle.getItemCount(slot) == 0 then
+      lastKnownEmptySlot = slot
+      return true
+    end
+  end
+  print("Warning: Low Inventory Space! Making Room...")
+  return makeSpace()
+end
+
+function makeSpace()
+  local haveMadeSpace = false
+  for slot = 1,16 do
+    if isIgnoreSlot(slot) then
+      -- Drop all but one
+      turtle.select(slot)
+      turtle.dropDown(turtle.getItemCount(slot) - 1)
+    elseif isIgnoreBlock(slot) then
+      -- Drop it all
+      turtle.select(slot)
+      turtle.dropDown()
+      haveMadeSpace = true
+    end
+  end
+  turtle.select(1)
+  return haveMadeSpace
+end
+
+function isIgnoreSlot(slot)
+  for i = 1,#ignoreBlocks do
+    if slot == ignoreBlocks[i] then
+      return true
+    end
+  end
+  return false
+end
+
+function isIgnoreBlock(slot)
+  turtle.select(slot)
+  for i = 1,#ignoreBlocks do
+    if turtle.compareTo(ignoreBlocks[i]) then
+      turtle.select(1)
+      return true
+    end
+  end
+  turtle.select(1)
+  return false
+end
+
+function findChest()
+  for i = 1,4 do
+    if not turtle.detect() then
+      turn.right()
+    else
+      return true
+    end
+  end
+  return false
+end
+
+function deposit()
+  if inv.findChest() then
+    for slot = 1,16 do
+      if inv.isIgnoreSlot(slot) then
+        turtle.select(slot)
+        turtle.drop(turtle.getItemCount(slot) - 1)
+      elseif slot ~= fuel.getSlot() then 
+        turtle.select(slot)
+        turtle.drop()
+      end
+    end
+    turtle.select(1)
+    return true
+  end
+  turtle.select(1)
+  return false
+end

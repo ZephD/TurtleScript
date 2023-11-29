@@ -1,0 +1,195 @@
+-- Movement API
+
+-- ToDo: Smart "home/return" function (vert then horz or horz then vert?)
+
+function forwards(dist,args)
+  return move.forward(dist,args)
+end
+    
+function forward(dist,args)
+  local dist = dist or 1
+  local checkInv = false
+  local checkOre = false
+  local args = args or {}
+  for i,v in ipairs(args) do
+    if v=="checkInv" then
+      checkInv = true
+    end
+    if v=="checkOre" or v=="checkOres" then
+      checkOre = true
+    end
+  end
+  if not fuel.check(dist) then
+    return false
+  end
+  for i = 1,dist do
+    while not turtle.forward() do
+      if not dig.forward(checkInv) and not attack.forward() then
+        print("Warning: Failed move.forward.")
+        return false
+      end
+    end
+    log.updateXY(1)
+    if checkOre then
+      dig.checkOre({-1,1})
+    end
+  end
+  return true
+end
+
+function back(dist,args)
+  local dist = dist or 1
+  local checkOre = false
+  local args = args or {}
+  for i,v in ipairs(args) do
+    if v=="checkOre" or v=="checkOres" then
+      checkOre = true
+    end
+  end
+  if not fuel.check(dist) then
+    return false
+  end
+  for i = 1,dist do
+    if not turtle.back() then
+      turn.right(2)
+      move.forward(1,args) -- Note: updates XY
+      turn.right(2)
+    else
+      log.updateXY(-1)
+      if checkOre then
+        dig.checkOre({-1,1})
+      end
+    end
+  end
+  return true
+end
+
+function up(dist,args)
+  local dist = dist or 1
+  local checkInv = false
+  local checkOre = false
+  local args = args or {}
+  for i,v in ipairs(args) do
+    if v=="checkInv" then
+      checkInv = true
+    end
+    if v=="checkOre" or v=="checkOres" then
+      checkOre = true
+    end
+  end
+  if not fuel.check(dist) then
+    return false
+  end
+  for i = 1,dist do
+    while not turtle.up() do
+      if not dig.up(checkInv) and not attack.up() then
+        print("Warning: Failed move.up.")
+        return false
+      end
+    end
+    log.updateD(1)
+    if checkOre then
+      dig.checkOre(0)
+    end
+  end
+  return true
+end
+
+function down(dist,tf)
+  local dist = dist or 1
+  local tf = tf or false
+  local dist = dist or 1
+  if checkInv and not fuel.check(dist) then
+    return false
+  end
+  for i = 1,dist do
+    while not turtle.down() do
+      if not dig.down(tf) and not attack.down() then
+        print("Warning: Failed move.down.")
+        return false
+      end
+    end
+    log.updateD(-1)
+    if checkOre then
+      dig.checkOre()
+    end
+  end
+  return true
+end
+
+function toXY(x,y)
+  local cPos = log.getPos()
+  local dx = math.abs(cPos.x-x)
+  local dy = math.abs(cPos.y-y)
+  if dx<dy then
+    if not (move.toX(x) and move.toY(y)) then
+      return false
+    end
+  else
+    if not (move.toY(y) and move.toX(x)) then
+      return false
+    end
+  end
+  return true
+end
+
+function toX(x)
+  local cPos = log.getPos()
+  local dx = math.abs(cPos.x-x)
+  if cPos.x < x then
+    turn.faceYaw(1)
+    move.forward(dx)
+  elseif cPos.x > x then
+    turn.faceYaw(3)
+    move.forward(dx)
+  end
+  if log.getPos().x ~= x then
+    print("Warning: Failed to get to "..x..". ("..log.getPos().x..")")
+    return false
+  end
+  return true
+end
+
+function toY(y)
+  local cPos = log.getPos()
+  local dy = math.abs(cPos.y-y)
+  if cPos.y < y then
+    turn.faceYaw(0)
+    move.forward(dy)
+  elseif cPos.y > y then
+    turn.faceYaw(2)
+    move.forward(dy)
+  end
+  if log.getPos().y ~= y then
+    print("Warning: Failed to get to "..y..". ("..log.getPos().y..")")
+    return false
+  end
+  return true
+end
+
+function toD(d)
+  local cPos = log.getPos()
+  local dd = math.abs(cPos.d-d)
+  if cPos.d < d then
+    move.up(dd)
+  elseif cPos.d > d then
+    move.down(dd)
+  end
+  cPos = log.getPos()
+  if cPos.d ~= d then
+    print("Warning: Failed to get to Depth: "..d)
+    return false
+  end
+  return true
+end
+
+function home(tf)
+  local tf = tf or false
+  if tf then
+    move.toXY(0,0)
+    move.toD(0)
+  else
+    move.toD(0)
+    move.toXY(0,0)
+  end
+end

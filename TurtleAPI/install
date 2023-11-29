@@ -1,0 +1,12 @@
+-- Get Update
+shell.run("market get gjdhx2 update y")
+
+-- Install API
+shell.run("update api")
+shell.run("update startup")
+
+-- Remove install file
+shell.run("rm install")
+
+-- Reboot
+os.reboot()
